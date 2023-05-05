@@ -21,7 +21,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.socket.server.standard.ServerEndpointExporter;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.socket.server.HandshakeInterceptor;
+
 
 /**
  * @author Zheng Jie
@@ -29,17 +34,30 @@ import org.springframework.web.socket.server.standard.ServerEndpointExporter;
  **/
 @Configuration
 @EnableScheduling
-public class WebSocketConfig {
+@EnableWebSocket
+public class WebSocketConfig implements WebSocketConfigurer {
 
-    @Bean
-    public ServerEndpointExporter serverEndpointExporter() {
-        return new ServerEndpointExporter();
+    @Override
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(webSocketHandler(), "/api/ws/{sid}")
+                .setAllowedOrigins("*")
+                .addInterceptors(handshakeInterceptor());
     }
 
-    @Scheduled(fixedRate=15*1000)
-    public void configureTasks(){
+    @Bean
+    public WebSocketHandler webSocketHandler() {
+        return new WebSocketServer();
+    }
+
+    @Bean
+    public HandshakeInterceptor handshakeInterceptor() {
+        return new CustomHandshakeInterceptor();
+    }
+
+    @Scheduled(fixedRate = 15 * 1000)
+    public void configureTasks() {
         //  每15秒发送一次心跳
         //  避免 org.apache.tomcat.util.net.NioEndpoint$NioSocketWrapper.fillReadBuffer 错误
-        SpringContextHolder.getBean(WebSocketServer.class).groupMessage("this is the heartbeat message", null);
+        SpringContextHolder.getBean(WebSocketServer.class).groupMessage("this is the heartbeat message");
     }
 }

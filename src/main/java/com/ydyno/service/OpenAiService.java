@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 package com.ydyno.service;
+
 import com.ydyno.service.dto.OpenAiRequest;
 
 /**
@@ -26,8 +27,8 @@ public interface OpenAiService {
     /**
      * 问答，绘画
      *
-     * @param openAiDto       /
-     * @param webSocketServer /
+     * @param openAiDto /
+     * @param sid       /
      */
-    void communicate(OpenAiRequest openAiDto, WebSocketServer webSocketServer) throws Exception;
+    void communicate(OpenAiRequest openAiDto, String sid) throws Exception;
 }
